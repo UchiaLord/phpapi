@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h2>Login</h2>
+    <form id="loginForm">
+        <label for="email">Email: </label>
+        <input type="text" id="email" name="email" required><br><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        <input type="submit" value="Login">
+    </form>
+    <a href="register.html">Sign in</a>
+    <div id="message"></div>
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent the default form submission behavior
+            
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            axios.post("http://localhost:3000/login_api.php", {
+                email: email,
+                password: password
+            })
+            .then(function (response) {
+                if (response.data.success) {
+                    if (response.data.redirect === "crud/index.html") {
+                        window.location.href = "crud/index.html"; // Redirect to admin dashboard
+                    } else {
+                        window.location.href = "index.html"; // Redirect to user landing page
+                    }
+                } else {
+                    document.getElementById("message").innerHTML = "<p>" + response.data.message + "</p>";
+                }
+            })
+            .catch(function (error) {
+                document.getElementById("message").innerHTML = "<p>Error: " + (error.response.data.error || 'Unknown error occurred.') + "</p>";
+            });
+        });
+    </script>
+</body>
+</html>

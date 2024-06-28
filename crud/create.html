@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Product</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <h2>Add Product</h2>
+  <form id="productForm" enctype="multipart/form-data">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required><br><br>
+
+    <label for="description">Description:</label><br>
+    <textarea id="description" name="description" rows="4" required></textarea><br><br>
+
+    <label for="price">Price:</label>
+    <input type="number" id="price" name="price" step="0.01" required><br><br>
+
+    <label for="articlenumber">Article Number:</label>
+    <input type="text" id="articlenumber" name="articlenumber" required><br><br>
+
+    <label for="image_url">Image URL:</label>
+    <input type="file" id="image_url" name="image_url" /><br><br>
+
+    <input type="submit" value="Add Product">
+  </form>
+
+  <div id="message"></div>
+
+  <script>
+    // Event Listener for the form submission
+    document.getElementById("productForm").addEventListener("submit", function(event) {
+      event.preventDefault(); // Prevent default form submission
+
+      // Collect form data
+      let formData = new FormData();
+      formData.append("name", document.getElementById("name").value);
+      formData.append("description", document.getElementById("description").value);
+      formData.append("price", document.getElementById("price").value);
+      formData.append("articlenumber", document.getElementById("articlenumber").value);
+      formData.append("image_url", document.getElementById("image_url").files[0]); // Handle file input correctly
+      console.log("Form Data:", formData);
+      // Send POST request with Axios
+      axios.post("http://localhost:3000/crud/create_api.php", formData)
+        .then(function(response) {
+            console.log("Response Data:", response.data);
+          // Successful response from the server
+          document.getElementById("message").innerHTML = "<p>" + response.data.message + "</p>";
+          document.getElementById("productForm").reset(); // Reset the form
+          window.location.href = "index.html";
+        })
+        .catch(function(error) {
+          console.error("Request Error:", error);
+          // Error sending the request
+          document.getElementById("message").innerHTML = "<p>Error: " + error.response.data.error + "</p>";
+        });
+    });
+  </script>
+</body>
+</html>

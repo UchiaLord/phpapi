@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Landing Page</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .product {
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+      }
+      .product img {
+        max-width: 100px;
+        height: auto;
+        display: block;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <button id="logoutButton">Logout</button>
+      <script>
+        document
+          .getElementById("logoutButton")
+          .addEventListener("click", function () {
+            axios
+              .post("http://localhost:3000/logout_api.php")
+              .then(function (response) {
+                if (response.data.success) {
+                  window.location.href = "landing.html";
+                } else {
+                  alert(response.data.message);
+                }
+              })
+              .catch(function (error) {
+                alert(
+                  "Error: " +
+                    (error.response.data.message || "Unknown error occurred.")
+                );
+              });
+          });
+      </script>
+    </nav>
+
+    <h1>Welcome to Our Store</h1>
+    <div id="product-list"></div>
+
+    <script>
+      // Function to fetch products
+      function fetchProducts() {
+        axios
+          .get("http://localhost:3000/crud/index_api.php")
+          .then(function (response) {
+            const products = response.data;
+            displayProducts(products);
+          })
+          .catch(function (error) {
+            console.error("Error fetching products:", error);
+            document.getElementById("product-list").innerHTML =
+              "<p>Error loading products.</p>";
+          });
+      }
+
+      // Function to display products
+      function displayProducts(products) {
+        const productList = document.getElementById("product-list");
+        productList.innerHTML = "";
+
+        products.forEach(function (product) {
+          const productElement = document.createElement("div");
+          productElement.classList.add("product");
+
+          let price = "N/A";
+          if (!isNaN(parseFloat(product.price))) {
+            price = `$${parseFloat(product.price).toFixed(2)}`;
+          }
+
+          productElement.innerHTML = `
+                    <h2>${product.name}</h2>
+                    <img src="pictures/${product.image_url}" alt="${product.name}">
+                    <p>${product.description}</p>
+                    <p>Price: ${price}</p>
+                    <p>Article Number: ${product.articlenumber}</p>
+                `;
+
+          productList.appendChild(productElement);
+        });
+      }
+
+      // Fetch products when the page loads
+      document.addEventListener("DOMContentLoaded", fetchProducts);
+    </script>
+  </body>
+</html>

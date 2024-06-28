@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Update Product</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <h2>Update Product</h2>
+    <form id="productForm" enctype="multipart/form-data">
+      <!-- Verstecktes Feld für die Produkt-ID -->
+      <input type="hidden" id="productId" name="id" />
+
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required /><br /><br />
+
+      <label for="description">Description:</label><br />
+      <textarea id="description" name="description" rows="4" required></textarea
+      ><br /><br />
+
+      <label for="price">Price:</label>
+      <input
+        type="number"
+        id="price"
+        name="price"
+        step="0.01"
+        required
+      /><br /><br />
+
+      <label for="articlenumber">Article Number:</label>
+      <input
+        type="text"
+        id="articlenumber"
+        name="articlenumber"
+        required
+      /><br /><br />
+
+      <label for="image_url">Image URL:</label>
+      <input type="text" id="image_url" name="image_url" /><br /><br />
+
+      <input type="submit" value="Update Product" />
+    </form>
+
+    <div id="message"></div>
+
+    <script>
+      // Funktion zum Laden eines bestimmten Produkts anhand der Produkt-ID
+      function loadProduct(productId) {
+        console.log("Lade Produkt mit ID:", productId); // Debugging-Ausgabe
+        axios
+          .get(`http://localhost:3000/details_api.php?id=${productId}`)
+          .then(function (response) {
+            const product = response.data;
+            console.log("Produktdaten:", product); // Debugging-Ausgabe
+
+            // Formularfelder mit Produktinformationen füllen
+            document.getElementById("productId").value = product.id;
+            document.getElementById("name").value = product.name;
+            document.getElementById("description").value = product.description;
+            document.getElementById("price").value = product.price;
+            document.getElementById("articlenumber").value =
+              product.articlenumber;
+            document.getElementById("image_url").value = product.image_url;
+          })
+          .catch(function (error) {
+            console.error("Fehler beim Laden des Produkts:", error);
+          });
+      }
+
+      // Event Listener für das Formular
+      document
+        .getElementById("productForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault(); // Verhindert das Standardverhalten des Formulars
+
+          // Produkt-ID aus der versteckten Input auslesen
+          const productId = document.getElementById("productId").value;
+
+          // Formulardaten sammeln
+          let formData = new FormData();
+          formData.append("id", productId); // Produkt-ID hinzufügen
+          formData.append("name", document.getElementById("name").value);
+          formData.append(
+            "description",
+            document.getElementById("description").value
+          );
+          formData.append("price", document.getElementById("price").value);
+          formData.append(
+            "articlenumber",
+            document.getElementById("articlenumber").value
+          );
+          formData.append(
+            "image_url",
+            document.getElementById("image_url").value
+          );
+
+          console.log("Formulardaten:", formData); // Debugging-Ausgabe
+
+          // POST-Anfrage mit Axios senden
+          axios
+            .post("http://localhost:3000/update_api.php", formData)
+            .then(function (response) {
+              console.log("Erfolgreiche Antwort:", response.data); // Debugging-Ausgabe
+              document.getElementById("message").innerHTML =
+                "<p>" + response.data.message + "</p>";
+              window.location.href = "index.html";
+            })
+            .catch(function (error) {
+              console.error("Fehler beim Senden der Anfrage:", error);
+              document.getElementById("message").innerHTML =
+                "<p>Error: " + error.response.data.error + "</p>";
+            });
+        });
+
+      // Laden des Produkts beim Laden der Seite, basierend auf der Produkt-ID aus der URL
+      document.addEventListener("DOMContentLoaded", function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get("id");
+
+        if (productId) {
+          loadProduct(productId); // Funktion aufrufen, um Produkt mit der erhaltenen ID zu laden
+        } else {
+          console.error("Produkt-ID nicht gefunden.");
+        }
+      });
+    </script>
+  </body>
+</html>
